@@ -1,32 +1,51 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 
 const Login = () => {
-  const [name, setName] = useState("Basia");
-  const [password, setPassword] = useState("");
+  const [name, setName] = useState('wojtek');
+  const [password, setPassword] = useState('');
+  const [hasError, setHasError] = useState(false);
 
   const handleLogin = () => {
-    console.warn({ name, password });
+    // 'Basic (name:password)*' // base64
+    const token = btoa(`${name}:${password}`);
+    console.warn({ token });
+
+    fetch('/api/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ token }),
+    })
+      .then((r) => r.json())
+      .then(({ authorized }) => {
+        if (authorized) {
+          localStorage.setItem('token', token);
+          window.location.reload();
+        } else {
+          setHasError(true);
+        }
+      })
+      .catch(() => setHasError(true));
   };
 
   return (
     <section>
       <div>
-        <label>Username:</label>
-        <input
-          type="text"
-          onChange={(e) => setName(e.target.value)}
-          value={name}
-        />
+        <label>User name:</label>
+        <input onChange={(e) => setName(e.target.value)} value={name} />
       </div>
+
       <div>
-        <label>Password</label>
+        <label>Password:</label>
         <input
           type="password"
           onChange={(e) => setPassword(e.target.value)}
           value={password}
         />
       </div>
-      <button onClick={handleLogin}>Log in</button>
+      {hasError && <div>Invalid credentials</div>}
+      <button onClick={handleLogin}>log in</button>
     </section>
   );
 };

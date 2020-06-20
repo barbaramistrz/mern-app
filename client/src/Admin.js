@@ -1,38 +1,22 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react';
 
-const Admin = () => {
+const Admin = ({ token }) => {
   const [posts, setPosts] = useState([]);
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
+  const [title, setTitle] = useState('');
+  const [content, setContent] = useState('');
 
   useEffect(() => {
-    
+    fetch('/api/posts')
+      .then((r) => r.json())
+      .then((r) => setPosts(r.posts));
+  }, []);
 
-
-  fetch("/api/posts")
-    .then((response) => response.json())
-    .then((r) => setPosts(r.posts));
-
-  //   fetch('api/posts/gIt6mVlTqGonw7J8', {
-  //     method: 'PUT',
-  //     headers: {
-  //       'Content-Type': 'application/json',
-  //     },
-  //     body: JSON.stringify({
-  //       title: 'Moj nowy tytul po update',
-  //       content: 'Nowe lorem ipsum',
-  //     }),
-  //   })
-  //     .then((r) => r.json())
-  //     .then(console.warn);
-  // }, []);
-
-});
   const handlePostAdd = () => {
-    fetch('api/posts', {
+    fetch('/api/posts', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        Authorization: `Basic ${token}`,
       },
       body: JSON.stringify({ title, content }),
     })
@@ -41,38 +25,44 @@ const Admin = () => {
   };
 
   const handlePostDelete = (id) => {
-    fetch(`api/posts/${id}`, {
+    fetch(`/api/posts/${id}`, {
       method: 'DELETE',
+      headers: {
+        Authorization: `Basic ${token}`,
+      },
     })
       .then((r) => r.json())
       .then(console.warn);
   };
 
-
   return (
-    <div className="App">
+    <section>
       <ul>
-      {posts.map((post) => (
+        {posts.map((post) => (
           <li key={post._id} onClick={() => handlePostDelete(post._id)}>
             {post.title}
           </li>
         ))}
       </ul>
-      <input
-        type="text"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        placeholder="title"
-      />
-            <input
-        type="text"
-        value={content}
-        onChange={(e) => setContent(e.target.value)}
-        placeholder="content"
-      />
-      <button onClick={handlePostAdd}>Add</button>
-    </div>
+
+      <div>
+        <input
+          type="text"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="Title"
+        />
+
+        <input
+          type="text"
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+          placeholder="Content"
+        />
+        <button onClick={handlePostAdd}>dodaj</button>
+      </div>
+    </section>
   );
 };
 
-export {Admin};
+export { Admin };
